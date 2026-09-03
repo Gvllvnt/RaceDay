@@ -1,0 +1,75 @@
+name: CI - Validate Part 1 Docs
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Check docs folder exists
+      run: |
+        if [ -d "docs" ]; then
+          echo "✅ docs folder exists"
+        else
+          echo "❌ docs folder missing"
+          exit 1
+        fi
+    
+    - name: Check ERD exists
+      run: |
+        if [ -f "docs/ERD.png" ] || [ -f "docs/ERD.pdf" ]; then
+          echo "✅ ERD file exists"
+        else
+          echo "❌ ERD file missing (must be PNG or PDF)"
+          exit 1
+        fi
+    
+    - name: Check API Plan exists
+      run: |
+        if [ -f "docs/API_Endpoint_Plan.md" ] || [ -f "docs/API_Endpoint_Plan.pdf" ]; then
+          echo "✅ API Endpoint Plan exists"
+        else
+          echo "❌ API Endpoint Plan missing (must be MD or PDF)"
+          exit 1
+        fi
+    
+    - name: Check SQL Script exists
+      run: |
+        if [ -f "docs/RaceDay_Schema.sql" ]; then
+          echo "✅ SQL Script exists"
+        else
+          echo "❌ SQL Script missing (must be .sql file)"
+          exit 1
+        fi
+    
+    - name: Validate README exists
+      run: |
+        if [ -f "README.md" ]; then
+          echo "✅ README.md exists"
+        else
+          echo "❌ README.md missing"
+          exit 1
+        fi
+    
+    - name: Check SQL Script has required tables
+      run: |
+        if grep -q "CREATE TABLE Users" docs/RaceDay_Schema.sql && \
+           grep -q "CREATE TABLE Events" docs/RaceDay_Schema.sql && \
+           grep -q "CREATE TABLE Categories" docs/RaceDay_Schema.sql && \
+           grep -q "CREATE TABLE Enrolments" docs/RaceDay_Schema.sql && \
+           grep -q "CREATE TABLE Results" docs/RaceDay_Schema.sql; then
+          echo "✅ SQL Script contains all required tables"
+        else
+          echo "❌ SQL Script missing required tables"
+          exit 1
+        fi
+    
+    - name: Final Status
+      run: echo "🎉 All validation checks passed! Green build ✅"
