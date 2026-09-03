@@ -2,7 +2,7 @@
 -- DATABASE: RaceDayDB
 -- DESCRIPTION: RaceDay Event Management System
 -- AUTHOR: Thamanda Sobekwa
--- SUBMISSION DATE: 4 September 2026
+-- DATE: 17 August 2026
 -- ============================================================
 
 -- Drop database if it exists (for clean testing)
