@@ -21,7 +21,7 @@ The database consists of **5 core entities**:
 ### 🛠️ Setup Instructions
 1. Clone this repository
 2. Open `docs/RaceDay_Schema.sql` in SQL Server Management Studio
-3. Execute the script to create the RaceDayDB database
+3. Execute the script to create the RaceDayDB databas
 
 ### ✅ CI/CD Status
 ![CI/CD Build](https://github.com/Gvllvnt/RaceDay/actions/workflows/ci.yml/badge.svg)
