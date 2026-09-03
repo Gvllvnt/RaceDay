@@ -28,7 +28,7 @@ The database consists of **5 core entities**:
 
 ### 📸 CI/CD Green Build Screenshot
 
-![Green Build Screenshot](docs/greenbuild.png)
+![Green Build Screenshot](docs/green build.png)
 
 
 ### 👨‍💻 Author
