@@ -26,6 +26,10 @@ The database consists of **5 core entities**:
 ### ✅ CI/CD Status
 ![CI/CD Build](https://github.com/Gvllvnt/RaceDay/actions/workflows/ci.yml/badge.svg)
 
+### 📸 CI/CD Green Build Screenshot
+
+![Green Build Screenshot](docs/greenbuild.png)
+
 
 ### 👨‍💻 Author
 Thamanda Sobekwa
