@@ -223,7 +223,7 @@ INSERT INTO Events (organiser_id, title, description, event_date, location, rout
 
 (1, 'Durban Park Run Festival 2026',
  'Community 5km fun walk and run. Family-friendly event celebrating health and fitness.',
- '2026-05-25 07:00:00',
+ '2026-09-25 07:00:00',
  'Durban Botanic Gardens',
  'Loop through the Durban Botanic Gardens, along the pathways, with beautiful views of the gardens and surrounding area.',
  'Warm, humid. Average 22-28°C.',
