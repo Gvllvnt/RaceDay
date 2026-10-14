@@ -1,0 +1,9 @@
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.csproj.user
+appsettings.Development.json
+*.dll
+*.pdb
+TestResults/
