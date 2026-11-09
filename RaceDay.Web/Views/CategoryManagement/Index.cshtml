@@ -1,0 +1,83 @@
+@model CategoryManagementViewModel
+@{
+    ViewData["Title"] = "Categories - " + Model.Event.Title;
+    var evt = Model.Event;
+}
+
+<div class="page-head">
+    <h1>Categories</h1>
+    <p>@evt.Title &middot; @Display.Date(evt.EventDate)</p>
+    <div class="head-rule"></div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="rd-card rd-card-flush">
+            <div class="rd-card-head">
+                <h2>Distances and age groups</h2>
+                <a class="btn btn-outline-secondary btn-sm" asp-controller="EventManagement" asp-action="Index">Back to my events</a>
+            </div>
+
+            @if (!evt.Categories.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-signpost-2"></i>
+                    <p class="mb-0">No categories yet. Add the first one using the form.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table rd-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Category</th>
+                                <th scope="col">Distance</th>
+                                <th scope="col">Start</th>
+                                <th scope="col">Fee</th>
+                                <th scope="col" class="text-end">Entered</th>
+                                <th scope="col"><span class="visually-hidden">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in evt.Categories)
+                            {
+                                <tr>
+                                    <th scope="row">@c.Name</th>
+                                    <td>@Display.Distance(c.DistanceKm)</td>
+                                    <td>@Display.StartTime(c.StartTime)</td>
+                                    <td>@Display.Money(c.EntryFee)</td>
+                                    <td class="text-end">@c.CurrentEnrolments.ToString("N0") / @c.MaxParticipants.ToString("N0")</td>
+                                    <td class="text-end text-nowrap">
+                                        <a class="btn btn-dark btn-sm" asp-action="Edit" asp-route-id="@c.CategoryId" asp-route-eventId="@evt.EventId">Edit</a>
+                                        <form asp-action="Delete" method="post" class="d-inline"
+                                              onsubmit="return confirm('Delete this category? Anyone enrolled in it will lose their entry.');">
+                                            <input type="hidden" name="id" value="@c.CategoryId" />
+                                            <input type="hidden" name="eventId" value="@evt.EventId" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="rd-card">
+            <h2>Add a category</h2>
+            <form asp-action="Create" method="post" novalidate>
+                <input type="hidden" name="EventId" value="@evt.EventId" />
+                <partial name="_CategoryFields" model="Model.NewCategory" />
+                <button type="submit" class="btn btn-primary w-100">Add category</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
