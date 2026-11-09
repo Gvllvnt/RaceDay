@@ -1,0 +1,64 @@
+@model List<MyResult>
+@{
+    ViewData["Title"] = "My results";
+}
+
+<div class="page-head">
+    <h1>My results</h1>
+    <p>Your race history. Organisers publish finish times and positions after each event.</p>
+    <div class="head-rule"></div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="rd-card empty-state">
+        <i class="bi bi-stopwatch"></i>
+        <p class="mb-2">No results yet. They'll appear here once an organiser publishes them.</p>
+        <a class="btn btn-primary" asp-controller="Enrolments" asp-action="Index">See my enrolments</a>
+    </div>
+}
+else
+{
+    <div class="rd-card rd-card-flush">
+        <div class="table-responsive">
+            <table class="table rd-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Event</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Finish time</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">Pace</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model)
+                    {
+                        <tr>
+                            <th scope="row">@r.EventTitle</th>
+                            <td>@Display.Date(r.EventDate)</td>
+                            <td>@r.Category <span class="text-muted">(@Display.Distance(r.Distance))</span></td>
+                            <td><span class="finish-time">@Display.Time(r.FinishTime)</span></td>
+                            <td>
+                                @if (r.Position.HasValue)
+                                {
+                                    <span class="position-big">@Display.Ordinal(r.Position.Value)</span>
+                                    @if (r.TotalFinishers >= r.Position.Value)
+                                    {
+                                        <span class="position-of">out of @r.TotalFinishers.ToString("N0") finishers</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                            <td>@(string.IsNullOrEmpty(r.Pace) ? "-" : r.Pace)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

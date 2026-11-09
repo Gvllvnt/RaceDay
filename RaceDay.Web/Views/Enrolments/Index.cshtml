@@ -1,0 +1,116 @@
+@model MyEnrolmentsViewModel
+@{
+    ViewData["Title"] = "My enrolments";
+}
+
+<div class="page-head">
+    <h1>My enrolments</h1>
+    <p>Every event you've entered and where each entry stands.</p>
+    <div class="head-rule"></div>
+</div>
+
+<div class="mb-4"><partial name="_StatusLegend" /></div>
+
+@if (!Model.Enrolments.Any())
+{
+    <div class="rd-card empty-state">
+        <i class="bi bi-flag"></i>
+        <p class="mb-2">You haven't entered any events yet.</p>
+        <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Browse upcoming events</a>
+    </div>
+}
+else
+{
+    <div class="rd-card rd-card-flush mb-4">
+        <div class="rd-card-head"><h2>Upcoming</h2><span class="text-muted">@Model.Upcoming.Count</span></div>
+        @if (!Model.Upcoming.Any())
+        {
+            <div class="empty-state py-4"><p class="mb-0">Nothing coming up. Time to pick your next race.</p></div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table rd-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Race no.</th>
+                            <th scope="col">Event</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Status</th>
+                            <th scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in Model.Upcoming)
+                        {
+                            <tr>
+                                <td>
+                                    @if (e.RaceNumber.HasValue)
+                                    {
+                                        <span class="race-no">@e.RaceNumber</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <th scope="row"><a asp-controller="Events" asp-action="Details" asp-route-id="@e.EventId">@e.EventTitle</a></th>
+                                <td>@e.Category <span class="text-muted">(@Display.Distance(e.Distance))</span></td>
+                                <td>@Display.Date(e.EventDate)</td>
+                                <td><partial name="_StatusBadge" model="@e.Status" /></td>
+                                <td class="text-end">
+                                    <form asp-action="Cancel" method="post" onsubmit="return confirm('Cancel this entry?');">
+                                        <input type="hidden" name="id" value="@e.EnrolmentId" />
+                                        <button type="submit" class="btn btn-outline-secondary btn-sm">Cancel entry</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    @if (Model.Past.Any())
+    {
+        <div class="rd-card rd-card-flush">
+            <div class="rd-card-head"><h2>Past events</h2><span class="text-muted">@Model.Past.Count</span></div>
+            <div class="table-responsive">
+                <table class="table rd-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Race no.</th>
+                            <th scope="col">Event</th>
+                            <th scope="col">Category</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var e in Model.Past)
+                        {
+                            <tr>
+                                <td>
+                                    @if (e.RaceNumber.HasValue)
+                                    {
+                                        <span class="race-no">@e.RaceNumber</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <th scope="row"><a asp-controller="Events" asp-action="Details" asp-route-id="@e.EventId">@e.EventTitle</a></th>
+                                <td>@e.Category <span class="text-muted">(@Display.Distance(e.Distance))</span></td>
+                                <td>@Display.Date(e.EventDate)</td>
+                                <td><partial name="_StatusBadge" model="@e.Status" /></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
