@@ -1,0 +1,108 @@
+@model EventFormViewModel
+@{
+    ViewData["Title"] = Model.IsEdit ? "Edit event" : "New event";
+    var formAction = Model.IsEdit ? "Edit" : "Create";
+}
+
+<div class="page-head">
+    <h1>@(Model.IsEdit ? "Edit event" : "New event")</h1>
+    <p>@(Model.IsEdit ? "Update the details participants see." : "Tell participants what, where and when. You'll add categories next.")</p>
+    <div class="head-rule"></div>
+</div>
+
+<form asp-action="@formAction" asp-route-id="@(Model.IsEdit ? Model.EventId : (int?)null)" method="post" enctype="multipart/form-data" novalidate>
+    <input type="hidden" asp-for="EventId" />
+    <input type="hidden" asp-for="ExistingBannerUrl" />
+    <div asp-validation-summary="ModelOnly" class="alert alert-danger rd-alert"></div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="rd-card">
+                <h2>Event details</h2>
+
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" maxlength="200" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="4" maxlength="1000"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="EventDate" class="form-label"></label>
+                        <input asp-for="EventDate" type="datetime-local" class="form-control"
+                               value="@(Model.EventDate.HasValue ? Model.EventDate.Value.ToString("yyyy-MM-ddTHH:mm") : string.Empty)" />
+                        <span asp-validation-for="EventDate" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="Location" class="form-label"></label>
+                        <input asp-for="Location" class="form-control" maxlength="200" placeholder="e.g. Pietermaritzburg to Durban" />
+                        <span asp-validation-for="Location" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label asp-for="Distance" class="form-label"></label>
+                        <input asp-for="Distance" type="number" step="0.1" min="0.1" class="form-control" />
+                        <span asp-validation-for="Distance" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6">
+                        <label asp-for="EventType" class="form-label"></label>
+                        <select asp-for="EventType" class="form-select">
+                            <option value="">Choose a type</option>
+                            <option value="run">Run</option>
+                            <option value="walk">Walk</option>
+                            <option value="cycle">Cycle</option>
+                        </select>
+                        <span asp-validation-for="EventType" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="RouteInfo" class="form-label"></label>
+                    <textarea asp-for="RouteInfo" class="form-control" rows="3" maxlength="1000"></textarea>
+                    <span asp-validation-for="RouteInfo" class="text-danger"></span>
+                </div>
+
+                <div class="mb-0">
+                    <label asp-for="WeatherInfo" class="form-label"></label>
+                    <input asp-for="WeatherInfo" class="form-control" maxlength="500" placeholder="e.g. Cool start, warming to 24 C" />
+                    <span asp-validation-for="WeatherInfo" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="rd-card">
+                <h2>Banner image</h2>
+                @if (!string.IsNullOrEmpty(Model.ExistingBannerUrl))
+                {
+                    <img src="@Model.ExistingBannerUrl" alt="Current event banner" class="banner-preview mb-3" id="banner-preview" />
+                }
+                else
+                {
+                    <img alt="Preview of the new banner" class="banner-preview mb-3 d-none" id="banner-preview" />
+                }
+                <label asp-for="BannerFile" class="form-label"></label>
+                <input asp-for="BannerFile" type="file" class="form-control" accept="image/png,image/jpeg,image/webp" data-preview="#banner-preview" />
+                <div class="form-text">JPG, PNG or WEBP, up to 5 MB. Shown on the event page.</div>
+                <span asp-validation-for="BannerFile" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">@(Model.IsEdit ? "Save changes" : "Create event")</button>
+        <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

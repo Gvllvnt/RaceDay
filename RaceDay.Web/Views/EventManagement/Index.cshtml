@@ -1,0 +1,77 @@
+@model List<EventSummary>
+@{
+    ViewData["Title"] = "My events";
+}
+
+<div class="page-head d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+        <h1>My events</h1>
+        <p>Create and edit events, then manage their categories, entries and results.</p>
+        <div class="head-rule"></div>
+    </div>
+    <a class="btn btn-primary" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>New event</a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="rd-card empty-state">
+        <i class="bi bi-flag"></i>
+        <p class="mb-2">You haven't created any events yet.</p>
+        <a class="btn btn-primary" asp-action="Create">Create your first event</a>
+    </div>
+}
+else
+{
+    <div class="rd-card rd-card-flush">
+        <div class="table-responsive">
+            <table class="table rd-table">
+                <thead>
+                    <tr>
+                        <th scope="col"><span class="visually-hidden">Banner</span></th>
+                        <th scope="col">Event</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Type</th>
+                        <th scope="col" class="text-end">Categories</th>
+                        <th scope="col" class="text-end">Enrolled</th>
+                        <th scope="col"><span class="visually-hidden">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.OrderByDescending(x => x.EventDate))
+                    {
+                        <tr>
+                            <td>
+                                @if (!string.IsNullOrEmpty(e.BannerUrl))
+                                {
+                                    <img class="thumb" src="@e.BannerUrl" alt="" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="thumb-fallback"><i class="bi @Display.EventTypeIcon(e.EventType)"></i></div>
+                                }
+                            </td>
+                            <th scope="row">
+                                <a asp-controller="Events" asp-action="Details" asp-route-id="@e.EventId">@e.Title</a><br />
+                                <span class="text-muted fw-normal">@e.Location</span>
+                            </th>
+                            <td>@Display.Date(e.EventDate)</td>
+                            <td>@Display.EventTypeLabel(e.EventType) @(e.Distance.HasValue ? "· " + Display.Distance(e.Distance) : string.Empty)</td>
+                            <td class="text-end">@e.CategoryCount</td>
+                            <td class="text-end">@e.TotalEnrolments.ToString("N0")</td>
+                            <td class="text-end text-nowrap">
+                                <a class="btn btn-outline-primary btn-sm" asp-controller="CategoryManagement" asp-action="Index" asp-route-eventId="@e.EventId">Categories</a>
+                                <a class="btn btn-outline-primary btn-sm" asp-controller="EnrolmentManagement" asp-action="Index" asp-route-eventId="@e.EventId">Enrolments</a>
+                                <a class="btn btn-outline-primary btn-sm" asp-controller="ResultManagement" asp-action="Index" asp-route-eventId="@e.EventId">Results</a>
+                                <a class="btn btn-dark btn-sm" asp-action="Edit" asp-route-id="@e.EventId">Edit</a>
+                                <form asp-action="Delete" asp-route-id="@e.EventId" method="post" class="d-inline"
+                                      onsubmit="return confirm('Delete this event? It will no longer be visible to participants.');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
