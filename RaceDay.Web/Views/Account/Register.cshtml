@@ -1,0 +1,64 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Create your account";
+}
+
+<div class="auth-wrap">
+    <div class="page-head">
+        <h1>Join RaceDay</h1>
+        <p>One account to enter races, or to organise them.</p>
+        <div class="head-rule"></div>
+    </div>
+
+    <div class="rd-card">
+        <form asp-action="Register" method="post" novalidate>
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger rd-alert"></div>
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label"></label>
+                <input asp-for="FullName" class="form-control" autocomplete="name" autofocus />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email address</label>
+                <input asp-for="Email" class="form-control" autocomplete="email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="row g-3 mb-3">
+                <div class="col-12 col-sm-6">
+                    <label asp-for="Password" class="form-label"></label>
+                    <input asp-for="Password" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="col-12 col-sm-6">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <fieldset class="mb-4">
+                <legend class="form-label fs-6">I want to</legend>
+                <div class="role-choice">
+                    <div>
+                        <input type="radio" id="role-participant" name="Role" value="Participant" checked="@(Model.Role != "Organiser")" />
+                        <label for="role-participant"><strong>Enter events</strong><span>Browse races, enrol and track my results.</span></label>
+                    </div>
+                    <div>
+                        <input type="radio" id="role-organiser" name="Role" value="Organiser" checked="@(Model.Role == "Organiser")" />
+                        <label for="role-organiser"><strong>Organise events</strong><span>Create events, manage entries, publish results.</span></label>
+                    </div>
+                </div>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary w-100">Create account</button>
+        </form>
+    </div>
+
+    <p class="text-center mt-3">Already have an account? <a asp-action="Login">Log in</a></p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

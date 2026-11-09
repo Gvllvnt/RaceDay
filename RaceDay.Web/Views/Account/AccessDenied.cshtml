@@ -1,0 +1,11 @@
+@{
+    ViewData["Title"] = "Access denied";
+    var user = Context.Session.GetUser();
+}
+
+<div class="rd-card empty-state mx-auto" style="max-width: 560px;">
+    <i class="bi bi-slash-circle"></i>
+    <h1 class="h2">That area isn't for your role</h1>
+    <p>This page is only available to @(user != null && user.IsOrganiser ? "participants" : "organisers").</p>
+    <a class="btn btn-primary" asp-controller="Home" asp-action="Index">Take me home</a>
+</div>
