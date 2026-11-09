@@ -1,0 +1,84 @@
+@model HomeIndexViewModel
+@{
+    ViewData["Title"] = "Upcoming events";
+    var loggedIn = Context.Session.GetUser() != null;
+}
+
+<section class="hero">
+    <h1 class="display-title">Find your <span>start line</span></h1>
+    <p>Road runs, walks and cycle tours across South Africa. Pick an event, choose your distance and enter in a minute.</p>
+    @if (!loggedIn)
+    {
+        <a class="btn btn-primary me-2" asp-controller="Account" asp-action="Register">Create a free account</a>
+        <a class="btn btn-outline-light" asp-controller="Account" asp-action="Login">Log in</a>
+    }
+</section>
+
+<form method="get" asp-controller="Home" asp-action="Index" class="filter-bar" role="search">
+    <div class="row g-3 align-items-end">
+        <div class="col-12 col-md-4">
+            <label for="search" class="form-label">Search events</label>
+            <input id="search" name="search" value="@Model.Search" class="form-control" placeholder="Event name or place" maxlength="100" />
+        </div>
+        <div class="col-6 col-md-3">
+            <label for="eventType" class="form-label">Event type</label>
+            <select id="eventType" name="eventType" class="form-select">
+                <option value="" selected="@string.IsNullOrEmpty(Model.EventType)">All types</option>
+                <option value="run" selected="@(Model.EventType == "run")">Run</option>
+                <option value="walk" selected="@(Model.EventType == "walk")">Walk</option>
+                <option value="cycle" selected="@(Model.EventType == "cycle")">Cycle</option>
+            </select>
+        </div>
+        <div class="col-6 col-md-3">
+            <label for="location" class="form-label">Location</label>
+            <input id="location" name="location" value="@Model.Location" class="form-control" placeholder="e.g. Cape Town" maxlength="100" />
+        </div>
+        <div class="col-12 col-md-2 d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1">Filter</button>
+            @if (Model.HasFilters)
+            {
+                <a class="btn btn-outline-secondary" asp-controller="Home" asp-action="Index" title="Clear filters">Clear</a>
+            }
+        </div>
+    </div>
+</form>
+
+<div class="d-flex justify-content-between align-items-baseline mb-3">
+    <h2 class="h3 mb-0">Upcoming events</h2>
+    <span class="text-muted">@Model.Events.Count @(Model.Events.Count == 1 ? "event" : "events")</span>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.LoadError))
+{
+    <div class="rd-card empty-state">
+        <i class="bi bi-wifi-off"></i>
+        <p class="mb-2">@Model.LoadError</p>
+        <a class="btn btn-primary btn-sm" asp-controller="Home" asp-action="Index">Try again</a>
+    </div>
+}
+else if (!Model.Events.Any())
+{
+    <div class="rd-card empty-state">
+        <i class="bi bi-flag"></i>
+        @if (Model.HasFilters)
+        {
+            <p class="mb-2">No upcoming events match those filters.</p>
+            <a class="btn btn-primary btn-sm" asp-controller="Home" asp-action="Index">Show all events</a>
+        }
+        else
+        {
+            <p class="mb-0">There are no upcoming events yet. Check back soon.</p>
+        }
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        @foreach (var evt in Model.Events)
+        {
+            <div class="col-12 col-md-6 col-xl-4">
+                <partial name="_EventCard" model="evt" />
+            </div>
+        }
+    </div>
+}

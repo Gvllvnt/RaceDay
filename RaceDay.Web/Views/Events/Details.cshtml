@@ -1,0 +1,149 @@
+@model EventDetailsViewModel
+@{
+    var evt = Model.Event;
+    ViewData["Title"] = evt.Title;
+    var user = Context.Session.GetUser();
+    var returnUrl = Context.Request.Path + Context.Request.QueryString;
+}
+
+<div class="event-banner">
+    @if (!string.IsNullOrEmpty(evt.BannerUrl))
+    {
+        <img src="@evt.BannerUrl" alt="Banner for @evt.Title" />
+    }
+    else
+    {
+        <div class="banner-fallback type-@(evt.EventType ?? "event")"><i class="bi @Display.EventTypeIcon(evt.EventType)"></i></div>
+    }
+    <div class="bib">
+        <span class="bib-day">@evt.EventDate.ToString("dd")</span>
+        <span class="bib-month">@evt.EventDate.ToString("MMM yyyy")</span>
+    </div>
+</div>
+
+<div class="page-head">
+    <h1>@evt.Title</h1>
+    <div class="chip-row mt-2">
+        <span class="chip chip-type"><i class="bi @Display.EventTypeIcon(evt.EventType)"></i>@Display.EventTypeLabel(evt.EventType)</span>
+        @if (evt.Distance.HasValue)
+        {
+            <span class="chip">@Display.Distance(evt.Distance)</span>
+        }
+        @if (Model.HasPassed)
+        {
+            <span class="chip">This event has taken place</span>
+        }
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="rd-card mb-4">
+            <h2>About this event</h2>
+            <p class="mb-0" style="white-space: pre-line;">@(string.IsNullOrWhiteSpace(evt.Description) ? "The organiser hasn't added a description yet." : evt.Description)</p>
+        </div>
+
+        @if (!string.IsNullOrWhiteSpace(evt.RouteInfo))
+        {
+            <div class="rd-card mb-4">
+                <h2>Route</h2>
+                <p class="mb-0" style="white-space: pre-line;">@evt.RouteInfo</p>
+            </div>
+        }
+
+        <div class="rd-card rd-card-flush">
+            <div class="rd-card-head">
+                <h2>Categories</h2>
+                @if (user == null && !Model.HasPassed)
+                {
+                    <a class="btn btn-primary btn-sm" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">Log in to enrol</a>
+                }
+            </div>
+
+            @if (!evt.Categories.Any())
+            {
+                <div class="empty-state">
+                    <i class="bi bi-hourglass-split"></i>
+                    <p class="mb-0">The organiser hasn't opened any categories for this event yet.</p>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table rd-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Category</th>
+                                <th scope="col">Distance</th>
+                                <th scope="col">Start</th>
+                                <th scope="col">Entry fee</th>
+                                <th scope="col">Spots left</th>
+                                <th scope="col"><span class="visually-hidden">Enrol</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in evt.Categories)
+                            {
+                                <tr>
+                                    <th scope="row">@c.Name</th>
+                                    <td>@Display.Distance(c.DistanceKm)</td>
+                                    <td>@Display.StartTime(c.StartTime)</td>
+                                    <td>@Display.Money(c.EntryFee)</td>
+                                    <td>@(c.IsFull ? "Full" : c.SpotsLeft.ToString("N0"))</td>
+                                    <td class="text-end">
+                                        @if (Model.HasPassed)
+                                        {
+                                            <span class="text-muted">Closed</span>
+                                        }
+                                        else if (user == null)
+                                        {
+                                            <a class="btn btn-outline-primary btn-sm" asp-controller="Account" asp-action="Login" asp-route-returnUrl="@returnUrl">Log in to enrol</a>
+                                        }
+                                        else if (user.IsOrganiser)
+                                        {
+                                            <span class="text-muted">Participants only</span>
+                                        }
+                                        else if (Model.EnrolledCategoryIds.Contains(c.CategoryId))
+                                        {
+                                            <partial name="_StatusBadge" model="@("Confirmed")" />
+                                        }
+                                        else if (c.IsFull)
+                                        {
+                                            <span class="badge text-bg-secondary">Full</span>
+                                        }
+                                        else
+                                        {
+                                            <form asp-controller="Enrolments" asp-action="Enrol" method="post" class="d-inline">
+                                                <input type="hidden" name="eventId" value="@evt.EventId" />
+                                                <input type="hidden" name="categoryId" value="@c.CategoryId" />
+                                                <button type="submit" class="btn btn-primary btn-sm">Enrol</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="rd-card">
+            <h2>Race facts</h2>
+            <ul class="fact-list">
+                <li><i class="bi bi-calendar-event-fill"></i><div><span class="fact-label">Date and start</span>@evt.EventDate.ToString("dddd, d MMMM yyyy 'at' HH:mm")</div></li>
+                <li><i class="bi bi-geo-alt-fill"></i><div><span class="fact-label">Location</span>@evt.Location</div></li>
+                @if (!string.IsNullOrWhiteSpace(evt.WeatherInfo))
+                {
+                    <li><i class="bi bi-cloud-sun-fill"></i><div><span class="fact-label">Weather</span>@evt.WeatherInfo</div></li>
+                }
+                @if (evt.Organiser != null)
+                {
+                    <li><i class="bi bi-person-badge-fill"></i><div><span class="fact-label">Organiser</span>@evt.Organiser.FullName</div></li>
+                }
+            </ul>
+        </div>
+    </div>
+</div>
