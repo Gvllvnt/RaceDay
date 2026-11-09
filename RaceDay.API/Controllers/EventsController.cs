@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
 using RaceDay.API.DTOs.Events;
 using RaceDay.API.Models;
+using RaceDay.API.Services;
 using System.Security.Claims;
 
 namespace RaceDay.API.Controllers;
@@ -13,15 +14,24 @@ namespace RaceDay.API.Controllers;
 public class EventsController : ControllerBase
 {
     private readonly RaceDayDbContext _context;
+    private readonly IBlobStorageService _blobStorage;
 
-    public EventsController(RaceDayDbContext context) => _context = context;
+    public EventsController(RaceDayDbContext context, IBlobStorageService blobStorage)
+    {
+        _context = context;
+        _blobStorage = blobStorage;
+    }
 
     private int CurrentUserId => int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
     /// <summary>Get all active events - public with optional filters</summary>
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> GetAll([FromQuery] string? location, [FromQuery] string? eventType)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? location,
+        [FromQuery] string? eventType,
+        [FromQuery] string? search,
+        [FromQuery] bool upcomingOnly = false)
     {
         var q = _context.Events
             .Include(e => e.Organiser)
@@ -34,7 +44,16 @@ public class EventsController : ControllerBase
         if (!string.IsNullOrEmpty(eventType))
             q = q.Where(e => e.EventType == eventType);
 
-        var events = await q.Select(e => new
+        if (!string.IsNullOrWhiteSpace(search))
+            q = q.Where(e => e.Title.Contains(search) || e.Location.Contains(search));
+
+        if (upcomingOnly)
+        {
+            var today = DateTime.UtcNow.Date;
+            q = q.Where(e => e.EventDate >= today);
+        }
+
+        var events = await q.OrderBy(e => e.EventDate).Select(e => new
         {
             e.EventId,
             e.Title,
@@ -44,6 +63,7 @@ public class EventsController : ControllerBase
             e.Distance,
             e.EventType,
             e.RouteInfo,
+            e.BannerUrl,
             Organiser = e.Organiser!.FullName,
             CategoryCount = e.Categories.Count
         }).ToListAsync();
@@ -74,6 +94,7 @@ public class EventsController : ControllerBase
             evt.EventType,
             evt.RouteInfo,
             evt.WeatherInfo,
+            evt.BannerUrl,
             Organiser = new { evt.Organiser!.FullName, evt.Organiser.Email },
             Categories = evt.Categories.Select(c => new
             {
@@ -86,6 +107,34 @@ public class EventsController : ControllerBase
                 CurrentEnrolments = _context.Enrolments.Count(en => en.CategoryId == c.CategoryId)
             })
         });
+    }
+
+    /// <summary>Get the events created by the logged-in Organiser, with enrolment totals</summary>
+    [HttpGet("mine")]
+    [Authorize(Roles = "Organiser")]
+    public async Task<IActionResult> Mine()
+    {
+        var organiserId = CurrentUserId;
+
+        var events = await _context.Events
+            .Where(e => e.OrganiserId == organiserId && e.IsActive)
+            .OrderBy(e => e.EventDate)
+            .Select(e => new
+            {
+                e.EventId,
+                e.Title,
+                e.Description,
+                e.EventDate,
+                e.Location,
+                e.Distance,
+                e.EventType,
+                e.BannerUrl,
+                CategoryCount = e.Categories.Count,
+                TotalEnrolments = e.Categories.SelectMany(c => c.Enrolments).Count()
+            })
+            .ToListAsync();
+
+        return Ok(events);
     }
 
     /// <summary>Create a new event (Organiser only)</summary>
@@ -135,6 +184,36 @@ public class EventsController : ControllerBase
 
         await _context.SaveChangesAsync();
         return Ok(evt);
+    }
+
+    /// <summary>Upload or replace an event banner image in Azure Blob Storage (Organiser owner only)</summary>
+    [HttpPost("{id}/banner")]
+    [Authorize(Roles = "Organiser")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UploadBanner(int id, IFormFile file)
+    {
+        var evt = await _context.Events.FindAsync(id);
+        if (evt == null || !evt.IsActive) return NotFound();
+        if (evt.OrganiserId != CurrentUserId) return Forbid();
+
+        var validationError = _blobStorage.ValidateImage(file);
+        if (validationError != null)
+            return BadRequest(new { message = validationError });
+
+        try
+        {
+            var oldUrl = evt.BannerUrl;
+            evt.BannerUrl = await _blobStorage.UploadImageAsync(file, "banners");
+            await _context.SaveChangesAsync();
+            await _blobStorage.DeleteAsync(oldUrl);
+
+            return Ok(new { bannerUrl = evt.BannerUrl });
+        }
+        catch (Exception ex) when (ex is InvalidOperationException || ex is Azure.RequestFailedException)
+        {
+            return StatusCode(StatusCodes.Status503ServiceUnavailable,
+                new { message = "Image storage is currently unavailable. Please try again later." });
+        }
     }
 
     /// <summary>Soft delete event (Organiser owner only)</summary>

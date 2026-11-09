@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
@@ -40,7 +40,9 @@ public class ResultsController : ControllerBase
             EnrolmentId = enrolmentId,
             FinishTime = dto.FinishTime,
             Position = dto.Position,
-            Pace = dto.Pace
+            Pace = string.IsNullOrWhiteSpace(dto.Pace)
+                ? CalculatePace(dto.FinishTime, enrolment.Category.DistanceKm)
+                : dto.Pace
         };
 
         _context.Results.Add(result);
@@ -64,7 +66,9 @@ public class ResultsController : ControllerBase
 
         result.FinishTime = dto.FinishTime;
         result.Position = dto.Position;
-        result.Pace = dto.Pace;
+        result.Pace = string.IsNullOrWhiteSpace(dto.Pace)
+            ? CalculatePace(dto.FinishTime, result.Enrolment.Category.DistanceKm)
+            : dto.Pace;
 
         await _context.SaveChangesAsync();
         return Ok(result);
@@ -113,6 +117,7 @@ public class ResultsController : ControllerBase
             .Select(r => new
             {
                 r.ResultId,
+                r.EnrolmentId,
                 r.FinishTime,
                 r.Position,
                 r.Pace,
@@ -145,10 +150,25 @@ public class ResultsController : ControllerBase
                 Event = r.Enrolment!.Category!.Event!.Title,
                 EventDate = r.Enrolment.Category.Event.EventDate,
                 Category = r.Enrolment.Category.Name,
-                Distance = r.Enrolment.Category.DistanceKm
+                Distance = r.Enrolment.Category.DistanceKm,
+                TotalFinishers = _context.Results.Count(x =>
+                    x.Enrolment!.CategoryId == r.Enrolment.CategoryId && x.Position != null)
             })
             .ToListAsync();
 
         return Ok(results);
+    }
+
+    /// <summary>Average pace in min/km, e.g. "5:42 min/km"</summary>
+    private static string? CalculatePace(TimeOnly? finishTime, decimal distanceKm)
+    {
+        if (finishTime == null || distanceKm <= 0) return null;
+
+        var minutesPerKm = finishTime.Value.ToTimeSpan().TotalMinutes / (double)distanceKm;
+        var minutes = (int)minutesPerKm;
+        var seconds = (int)Math.Round((minutesPerKm - minutes) * 60);
+        if (seconds == 60) { minutes++; seconds = 0; }
+
+        return $"{minutes}:{seconds:D2} min/km";
     }
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System.ComponentModel.DataAnnotations;
 
 namespace RaceDay.API.Models;
@@ -19,6 +19,9 @@ public class User
 
     [Required, MaxLength(20)]
     public string Role { get; set; } = "Participant";
+
+    [MaxLength(500)]
+    public string? ProfilePictureUrl { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RaceDay.API.Models;
@@ -33,6 +33,9 @@ public class Event
 
     [MaxLength(500)]
     public string? WeatherInfo { get; set; }
+
+    [MaxLength(500)]
+    public string? BannerUrl { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public bool IsActive { get; set; } = true;

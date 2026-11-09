@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RaceDay.API.Data;
@@ -129,7 +129,12 @@ public class EnrolmentsController : ControllerBase
                 e.EnrolledAt,
                 Participant = e.Participant!.FullName,
                 ParticipantEmail = e.Participant.Email,
-                Category = e.Category!.Name
+                Category = e.Category!.Name,
+                Distance = e.Category.DistanceKm,
+                ResultId = e.Result != null ? (int?)e.Result.ResultId : null,
+                FinishTime = e.Result != null ? e.Result.FinishTime : null,
+                Position = e.Result != null ? e.Result.Position : null,
+                Pace = e.Result != null ? e.Result.Pace : null
             })
             .ToListAsync();
 
@@ -141,9 +146,9 @@ public class EnrolmentsController : ControllerBase
     [Authorize(Roles = "Organiser")]
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateStatusDto dto)
     {
-        var validStatuses = new[] { "Registered", "Completed", "DNS", "DNF" };
+        var validStatuses = new[] { "Registered", "Pending", "Confirmed", "Completed", "DNS", "DNF" };
         if (!validStatuses.Contains(dto.Status))
-            return BadRequest(new { message = "Invalid status. Must be Registered, Completed, DNS, or DNF" });
+            return BadRequest(new { message = "Invalid status. Must be Registered, Pending, Confirmed, Completed, DNS, or DNF" });
 
         var enrolment = await _context.Enrolments
             .Include(e => e.Category).ThenInclude(c => c!.Event)
