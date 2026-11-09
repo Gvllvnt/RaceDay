@@ -2,7 +2,7 @@ name: CI - Build, Test & Validate
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, 'part3/**' ]
   pull_request:
     branches: [ main, master ]
 
@@ -27,6 +27,12 @@ jobs:
 
     - name: Run Jarred's Unit Tests
       run: dotnet test RaceDay.sln --no-build --configuration Release --verbosity normal
+
+    - name: Build Part 3 MVC project
+      run: dotnet build RaceDay.Web/RaceDay.Web.csproj --no-restore --configuration Release
+
+    - name: Build Part 3 Docker image
+      run: docker build -t raceday-web ./RaceDay.Web
 
     - name: Validate Part 1 docs folder exists
       run: |
