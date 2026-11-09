@@ -63,7 +63,7 @@ namespace RaceDay.API.Migrations
                         new
                         {
                             CategoryId = 1,
-                            CreatedAt = new DateTime(2026, 10, 14, 9, 45, 41, 81, DateTimeKind.Utc).AddTicks(6840),
+                            CreatedAt = new DateTime(2026, 11, 9, 8, 55, 0, 617, DateTimeKind.Utc).AddTicks(9833),
                             DistanceKm = 90m,
                             EntryFee = 800m,
                             EventId = 1,
@@ -74,7 +74,7 @@ namespace RaceDay.API.Migrations
                         new
                         {
                             CategoryId = 2,
-                            CreatedAt = new DateTime(2026, 10, 14, 9, 45, 41, 81, DateTimeKind.Utc).AddTicks(6853),
+                            CreatedAt = new DateTime(2026, 11, 9, 8, 55, 0, 617, DateTimeKind.Utc).AddTicks(9892),
                             DistanceKm = 90m,
                             EntryFee = 800m,
                             EventId = 1,
@@ -85,7 +85,7 @@ namespace RaceDay.API.Migrations
                         new
                         {
                             CategoryId = 3,
-                            CreatedAt = new DateTime(2026, 10, 14, 9, 45, 41, 81, DateTimeKind.Utc).AddTicks(6856),
+                            CreatedAt = new DateTime(2026, 11, 9, 8, 55, 0, 617, DateTimeKind.Utc).AddTicks(9894),
                             DistanceKm = 109m,
                             EntryFee = 700m,
                             EventId = 2,
@@ -96,7 +96,7 @@ namespace RaceDay.API.Migrations
                         new
                         {
                             CategoryId = 4,
-                            CreatedAt = new DateTime(2026, 10, 14, 9, 45, 41, 81, DateTimeKind.Utc).AddTicks(6858),
+                            CreatedAt = new DateTime(2026, 11, 9, 8, 55, 0, 617, DateTimeKind.Utc).AddTicks(9896),
                             DistanceKm = 56m,
                             EntryFee = 950m,
                             EventId = 3,
@@ -149,6 +149,10 @@ namespace RaceDay.API.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventId"));
 
+                    b.Property<string>("BannerUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
@@ -200,7 +204,7 @@ namespace RaceDay.API.Migrations
                         new
                         {
                             EventId = 1,
-                            CreatedAt = new DateTime(2026, 10, 14, 9, 45, 41, 81, DateTimeKind.Utc).AddTicks(6762),
+                            CreatedAt = new DateTime(2026, 11, 9, 8, 55, 0, 617, DateTimeKind.Utc).AddTicks(9759),
                             Description = "The Ultimate Human Race - 90km",
                             Distance = 90m,
                             EventDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -213,7 +217,7 @@ namespace RaceDay.API.Migrations
                         new
                         {
                             EventId = 2,
-                            CreatedAt = new DateTime(2026, 10, 14, 9, 45, 41, 81, DateTimeKind.Utc).AddTicks(6786),
+                            CreatedAt = new DateTime(2026, 11, 9, 8, 55, 0, 617, DateTimeKind.Utc).AddTicks(9784),
                             Description = "World's largest timed cycle race",
                             Distance = 109m,
                             EventDate = new DateTime(2026, 3, 8, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -226,7 +230,7 @@ namespace RaceDay.API.Migrations
                         new
                         {
                             EventId = 3,
-                            CreatedAt = new DateTime(2026, 10, 14, 9, 45, 41, 81, DateTimeKind.Utc).AddTicks(6789),
+                            CreatedAt = new DateTime(2026, 11, 9, 8, 55, 0, 617, DateTimeKind.Utc).AddTicks(9787),
                             Description = "World's most beautiful marathon",
                             Distance = 56m,
                             EventDate = new DateTime(2026, 4, 15, 0, 0, 0, 0, DateTimeKind.Unspecified),
@@ -295,6 +299,10 @@ namespace RaceDay.API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ProfilePictureUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(20)
@@ -314,7 +322,7 @@ namespace RaceDay.API.Migrations
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "john@raceday.co.za",
                             FullName = "John Van Der Merwe",
-                            PasswordHash = "$2a$11$M3xr3VgmFYsZl8sec2VxwuTAKzADJs2r/boxAzs4voGHBO5DkKe02",
+                            PasswordHash = "$2a$11$hrrmq1HwccQsIDFVk.S5nu.MuFn9TzB3QUQyxyM7d2ugEqipI/rfq",
                             Role = "Organiser"
                         },
                         new
@@ -323,7 +331,7 @@ namespace RaceDay.API.Migrations
                             CreatedAt = new DateTime(2026, 1, 2, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "sarah@raceday.co.za",
                             FullName = "Sarah Naidoo",
-                            PasswordHash = "$2a$11$M3xr3VgmFYsZl8sec2VxwuTAKzADJs2r/boxAzs4voGHBO5DkKe02",
+                            PasswordHash = "$2a$11$hrrmq1HwccQsIDFVk.S5nu.MuFn9TzB3QUQyxyM7d2ugEqipI/rfq",
                             Role = "Organiser"
                         },
                         new
@@ -332,7 +340,7 @@ namespace RaceDay.API.Migrations
                             CreatedAt = new DateTime(2026, 1, 3, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "thabo@gmail.com",
                             FullName = "Thabo Mokoena",
-                            PasswordHash = "$2a$11$M3xr3VgmFYsZl8sec2VxwuTAKzADJs2r/boxAzs4voGHBO5DkKe02",
+                            PasswordHash = "$2a$11$hrrmq1HwccQsIDFVk.S5nu.MuFn9TzB3QUQyxyM7d2ugEqipI/rfq",
                             Role = "Participant"
                         },
                         new
@@ -341,7 +349,7 @@ namespace RaceDay.API.Migrations
                             CreatedAt = new DateTime(2026, 1, 4, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Email = "lisa@gmail.com",
                             FullName = "Lisa Van Wyk",
-                            PasswordHash = "$2a$11$M3xr3VgmFYsZl8sec2VxwuTAKzADJs2r/boxAzs4voGHBO5DkKe02",
+                            PasswordHash = "$2a$11$hrrmq1HwccQsIDFVk.S5nu.MuFn9TzB3QUQyxyM7d2ugEqipI/rfq",
                             Role = "Participant"
                         });
                 });
