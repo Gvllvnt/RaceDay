@@ -1,0 +1,97 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Organiser dashboard";
+    var user = Context.Session.GetUser();
+}
+
+<div class="page-head d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+        <h1>Dashboard</h1>
+        <p>Welcome back, @user?.FullName. Here's where your events stand.</p>
+        <div class="head-rule"></div>
+    </div>
+    <a class="btn btn-primary" asp-controller="EventManagement" asp-action="Create"><i class="bi bi-plus-lg me-1"></i>New event</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-12 col-sm-4">
+        <div class="stat-tile"><div class="stat-num">@Model.TotalEvents</div><div class="stat-label">Events created</div></div>
+    </div>
+    <div class="col-12 col-sm-4">
+        <div class="stat-tile"><div class="stat-num">@Model.TotalEnrolments.ToString("N0")</div><div class="stat-label">Total enrolments</div></div>
+    </div>
+    <div class="col-12 col-sm-4">
+        <div class="stat-tile"><div class="stat-num">@Model.Upcoming.Count</div><div class="stat-label">Upcoming events</div></div>
+    </div>
+</div>
+
+@if (!Model.Events.Any())
+{
+    <div class="rd-card empty-state">
+        <i class="bi bi-flag"></i>
+        <p class="mb-2">You haven't created an event yet.</p>
+        <a class="btn btn-primary" asp-controller="EventManagement" asp-action="Create">Create your first event</a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="rd-card rd-card-flush h-100">
+                <div class="rd-card-head"><h2>Upcoming dates</h2></div>
+                @if (!Model.Upcoming.Any())
+                {
+                    <div class="empty-state py-4"><p class="mb-0">No upcoming events scheduled.</p></div>
+                }
+                else
+                {
+                    @foreach (var e in Model.Upcoming.Take(6))
+                    {
+                        var days = (e.EventDate.Date - DateTime.Today).Days;
+                        <div class="upcoming-item">
+                            <div class="bib">
+                                <span class="bib-day">@e.EventDate.ToString("dd")</span>
+                                <span class="bib-month">@e.EventDate.ToString("MMM")</span>
+                            </div>
+                            <div class="flex-grow-1">
+                                <strong>@e.Title</strong><br />
+                                <span class="text-muted">@(days == 0 ? "Today" : days == 1 ? "Tomorrow" : "In " + days + " days") &middot; @e.TotalEnrolments enrolled</span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <div class="rd-card rd-card-flush">
+                <div class="rd-card-head"><h2>Enrolments per event</h2></div>
+                <div class="table-responsive">
+                    <table class="table rd-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Event</th>
+                                <th scope="col">Date</th>
+                                <th scope="col" class="text-end">Enrolled</th>
+                                <th scope="col"><span class="visually-hidden">Actions</span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var e in Model.Events.OrderByDescending(x => x.EventDate))
+                            {
+                                <tr>
+                                    <th scope="row">@e.Title</th>
+                                    <td>@Display.Date(e.EventDate)</td>
+                                    <td class="text-end"><strong>@e.TotalEnrolments.ToString("N0")</strong></td>
+                                    <td class="text-end">
+                                        <a class="btn btn-outline-primary btn-sm" asp-controller="EnrolmentManagement" asp-action="Index" asp-route-eventId="@e.EventId">Enrolments</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
