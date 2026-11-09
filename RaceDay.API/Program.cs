@@ -15,6 +15,7 @@ builder.Services.AddDbContext<RaceDayDbContext>(options =>
 // Services
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 
 // Controllers & Swagger
 builder.Services.AddControllers();
