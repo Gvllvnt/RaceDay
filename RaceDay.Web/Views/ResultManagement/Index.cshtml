@@ -1,0 +1,97 @@
+@model ResultManagementViewModel
+@{
+    ViewData["Title"] = "Results - " + Model.Event.Title;
+    var evt = Model.Event;
+}
+
+<div class="page-head d-flex flex-wrap justify-content-between align-items-end gap-3">
+    <div>
+        <h1>Results</h1>
+        <p>@evt.Title &middot; @Display.Date(evt.EventDate)</p>
+        <div class="head-rule"></div>
+    </div>
+    <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary" asp-controller="EventManagement" asp-action="Index">My events</a>
+        <a class="btn btn-outline-primary" asp-controller="EnrolmentManagement" asp-action="Index" asp-route-eventId="@evt.EventId">Enrolments</a>
+    </div>
+</div>
+
+@if (!Model.HasConcluded)
+{
+    <div class="alert alert-info rd-alert" role="status">
+        <i class="bi bi-info-circle-fill me-2"></i>Results can be captured once the event has taken place (@Display.Date(evt.EventDate)).
+    </div>
+}
+
+@if (!Model.Enrolments.Any())
+{
+    <div class="rd-card empty-state">
+        <i class="bi bi-stopwatch"></i>
+        <p class="mb-0">There is nobody to capture results for yet.</p>
+    </div>
+}
+else
+{
+    <div class="rd-card rd-card-flush">
+        <div class="rd-card-head">
+            <h2>Finish times and positions</h2>
+            <span class="text-muted">Saving a result publishes it to the participant's My Results page.</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table rd-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Race no.</th>
+                        <th scope="col">Participant</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Finish time</th>
+                        <th scope="col">Position</th>
+                        <th scope="col">Pace</th>
+                        <th scope="col"><span class="visually-hidden">Save</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.Enrolments)
+                    {
+                        var formId = "result-" + e.EnrolmentId;
+                        <tr>
+                            <td>
+                                @if (e.RaceNumber.HasValue)
+                                {
+                                    <span class="race-no">@e.RaceNumber</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                                @* The form is empty; the inputs in this row point at it with the form attribute. *@
+                                <form id="@formId" asp-action="Save" method="post">
+                                    <input type="hidden" name="eventId" value="@evt.EventId" />
+                                    <input type="hidden" name="enrolmentId" value="@e.EnrolmentId" />
+                                    <input type="hidden" name="resultId" value="@e.ResultId" />
+                                </form>
+                            </td>
+                            <th scope="row">@e.Participant</th>
+                            <td>@e.Category</td>
+                            <td style="min-width: 150px;">
+                                <input type="time" step="1" name="finishTime" form="@formId" class="form-control form-control-sm"
+                                       value="@(e.FinishTime.HasValue ? e.FinishTime.Value.ToString("HH:mm:ss") : string.Empty)"
+                                       aria-label="Finish time for @e.Participant" disabled="@(!Model.HasConcluded)" required />
+                            </td>
+                            <td style="min-width: 110px;">
+                                <input type="number" min="1" step="1" name="position" form="@formId" class="form-control form-control-sm"
+                                       value="@e.Position" aria-label="Position for @e.Participant" disabled="@(!Model.HasConcluded)" required />
+                            </td>
+                            <td>@(string.IsNullOrEmpty(e.Pace) ? "-" : e.Pace)</td>
+                            <td class="text-end">
+                                <button type="submit" form="@formId" class="btn btn-primary btn-sm" disabled="@(!Model.HasConcluded)">
+                                    @(e.ResultId.HasValue ? "Update" : "Publish")
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
